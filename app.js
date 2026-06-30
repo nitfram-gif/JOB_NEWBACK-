@@ -15,10 +15,18 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-const bot = new TelegramBot('8716005325:AAFen4TgCidblYpqqeaF4nu_QbmRjs7B-mU', { polling: true });
-bot.deleteWebHook().then(() => {
-  console.log('Webhook deleted. Polling started.');
-});
+const BOT_TOKEN = '8858252364:AAGM46oSa7dgx-NFkCcGcvSUjOeeMrIJ2JU';
+/* Delete any existing webhook first to avoid 409 Conflict on polling */
+const bot = new TelegramBot(BOT_TOKEN, { polling: false });
+axios.get(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook?drop_pending_updates=true`)
+  .then(() => {
+    bot.startPolling();
+    console.log('Webhook cleared. Polling started.');
+  })
+  .catch(err => {
+    console.error('deleteWebhook failed, starting polling anyway:', err.message);
+    bot.startPolling();
+  });
 app.set('trust proxy', 1);
 app.use(session({
   secret: '8c07f4a99f3e4b34b76d9d67a1c54629dce9aaab6c2f4bff1b3c88c7b6152b61',
